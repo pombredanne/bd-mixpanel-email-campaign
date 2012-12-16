@@ -1,5 +1,7 @@
+import time
+
 from bitdeli.chain import Profiles
-from bitdeli.widgets import Text
+from bitdeli.widgets import Text, set_theme
 
 def newest(prop):
     if prop:
@@ -35,13 +37,31 @@ def repos(profiles):
             if 'toydata' not in repo:
                 columns['repo'] = repo
         yield profile, columns
+
+def days_since_signup(profiles):
+    now = int(time.time() / 3600)
+    for profile, columns in profiles:
+        signup = profile['events'].get('viewed home page')
+        if signup:
+            hour, freq = min(list(iter(signup)))
+            columns['days_since_signup'] = (now - hour) / 24
+        yield profile, columns
+
+def draft_ran(profiles):
+    for profile, columns in profiles:
+        if 'ran draft' in profile['events']:
+            columns['ran_draft'] = 'yes'
+        yield profile, columns
         
 Profiles().map(begin)\
           .map(campaign)\
           .map(datasources)\
+          .map(days_since_signup)\
+          .map(draft_ran)\
           .map(repos)\
           .map(end)\
           .show('table',
+                label='MailChimp data',
                 id='email-data',
                 size=(12, 6),
                 csv_export=True)  
