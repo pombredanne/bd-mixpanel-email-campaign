@@ -12,7 +12,8 @@ def begin(profiles):
     for profile in profiles:
         props = profile['properties']
         if 'email' in props:
-            yield profile, {'email': newest(props['email'])}
+            yield profile, {'username': newest(props['username']),
+                            'email': newest(props['email'])}
                 
 def end(profiles):
     yield [columns for profile, columns in profiles]
